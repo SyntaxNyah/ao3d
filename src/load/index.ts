@@ -5,25 +5,30 @@ import {
   toLocalFile,
   type CollectedFile,
 } from "./fileSystem";
+import { parsePmdTexturePaths } from "./pmd";
 import { parsePmxTexturePaths } from "./pmx";
 import { resolveReferenceFiles, type LocalFile, type ReferenceFile } from "./referenceFiles";
 
+export type ModelKind = "pmx" | "pmd";
+
 export interface LoadedCharacter {
   files: LocalFile[];
-  /** Path of the .pmx relative to the drop/pick root. */
-  pmxPath: string;
-  pmx: ArrayBuffer;
-  /** Texture paths parsed from the PMX texture table. */
+  /** Path of the model (`.pmx` or `.pmd`) relative to the drop/pick root. */
+  modelPath: string;
+  /** Which format the model is; selects the texture walker and scene loader. */
+  modelKind: ModelKind;
+  model: ArrayBuffer;
+  /** Texture paths parsed from the model's texture table. */
   texturePaths: string[];
   /** Resolved textures, ready to pass to babylon-mmd as referenceFiles. */
   referenceFiles: ReferenceFile[];
-  /** PMX texture paths that had no matching file on disk. */
+  /** Texture paths that had no matching file on disk. */
   missingTextures: string[];
 }
 
 export type CharacterCallback = (character: LoadedCharacter) => void;
 
-const PMX_EXT = ".pmx";
+const MODEL_EXTENSIONS = [".pmx", ".pmd"] as const;
 
 /** Wire up drop + picker UI and hand completed characters to `onCharacterLoaded`. */
 export function initFileLoading(onCharacterLoaded: CharacterCallback): void {
@@ -44,7 +49,7 @@ export function initFileLoading(onCharacterLoaded: CharacterCallback): void {
         ? `, ${character.missingTextures.length} MISSING`
         : "";
       setStatus(
-        `Loaded ${character.pmxPath} — ${character.texturePaths.length} texture(s), ` +
+        `Loaded ${character.modelPath} — ${character.texturePaths.length} texture(s), ` +
           `${character.referenceFiles.length} resolved${missing}.`,
       );
       onCharacterLoaded(character);
@@ -75,18 +80,25 @@ export async function buildCharacter(collected: CollectedFile[]): Promise<Loaded
     files.push(await toLocalFile(collectedFile));
   }
 
-  const pmxFile = files.find((f) => f.path.toLowerCase().endsWith(PMX_EXT));
-  if (!pmxFile) {
-    throw new Error("No .pmx model found in the dropped files.");
+  const modelFile = files.find((f) =>
+    MODEL_EXTENSIONS.some((ext) => f.path.toLowerCase().endsWith(ext)),
+  );
+  if (!modelFile) {
+    throw new Error("No .pmx or .pmd model found in the dropped files.");
   }
 
-  const texturePaths = parsePmxTexturePaths(pmxFile.data);
-  const { referenceFiles, missing } = resolveReferenceFiles(files, pmxFile.path, texturePaths);
+  const modelKind: ModelKind = modelFile.path.toLowerCase().endsWith(".pmd") ? "pmd" : "pmx";
+  const texturePaths =
+    modelKind === "pmd"
+      ? parsePmdTexturePaths(modelFile.data)
+      : parsePmxTexturePaths(modelFile.data);
+  const { referenceFiles, missing } = resolveReferenceFiles(files, modelFile.path, texturePaths);
 
   return {
     files,
-    pmxPath: pmxFile.path,
-    pmx: pmxFile.data,
+    modelPath: modelFile.path,
+    modelKind,
+    model: modelFile.data,
     texturePaths,
     referenceFiles,
     missingTextures: missing,

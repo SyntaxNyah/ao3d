@@ -12,8 +12,9 @@ describe("ingestCharacter", () => {
         { path: "folder/UMA_point.vmd", data: new ArrayBuffer(6), mimeType: undefined },
         { path: "folder/Texture2D/face.png", data: new ArrayBuffer(7), mimeType: "image/png" },
       ],
-      pmxPath: "folder/1127_Fenomeno.pmx",
-      pmx: new ArrayBuffer(4),
+      modelPath: "folder/1127_Fenomeno.pmx",
+      modelKind: "pmx",
+      model: new ArrayBuffer(4),
       texturePaths: ["Texture2D/face.png"],
       referenceFiles: [
         { relativePath: "Texture2D/face.png", mimeType: "image/png", data: new ArrayBuffer(7) },

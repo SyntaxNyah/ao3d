@@ -42,7 +42,7 @@ initFileLoading((character) => {
       project.setModel(ingested.model);
       for (const motion of ingested.motions) project.addMotion(motion);
       for (const texture of ingested.textures) project.addTexture(texture);
-      project.options.name = ingested.model.name.replace(/\.pmx$/i, "");
+      project.options.name = ingested.model.name.replace(/\.(pmx|pmd)$/i, "");
 
       customize.hidden = false;
       customizer.render();

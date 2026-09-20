@@ -54,6 +54,11 @@ export function parsePmxTexturePaths(buffer: ArrayBuffer): string[] {
   const decoder = view.getUint8(9) === 1 ? UTF8 : UTF16LE;
   const additionalUvCount = view.getUint8(10);
   const vertexIndexSize = view.getUint8(11);
+  // Vertex *weights* reference bones, so the weight block uses the bone index
+  // size (byte 14), not the vertex index size (byte 11). Models with more than
+  // 65535 vertices but fewer than 65536 bones (e.g. vertexIndexSize 4,
+  // boneIndexSize 2) otherwise drift out of alignment.
+  const boneIndexSize = view.getUint8(14);
 
   let offset = 9 + globalsCount;
 
@@ -74,7 +79,7 @@ export function parsePmxTexturePaths(buffer: ArrayBuffer): string[] {
       throw new Error("PMX parse error: truncated vertex block");
     }
     const deformType = view.getUint8(offset);
-    offset += 1 + weightByteLength(deformType, vertexIndexSize) + 4;
+    offset += 1 + weightByteLength(deformType, boneIndexSize) + 4;
   }
 
   const faceCount = view.getUint32(offset, true);

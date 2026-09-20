@@ -11,6 +11,7 @@ import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { Scene } from "@babylonjs/core/scene";
 import "babylon-mmd/esm/Loader/mmdModelLoader"; // registers default MmdStandardMaterialBuilder
 import "babylon-mmd/esm/Loader/pmxLoader"; // registers the PMX scene loader
+import "babylon-mmd/esm/Loader/pmdLoader"; // registers the PMD scene loader
 import { SdefInjector } from "babylon-mmd/esm/Loader/sdefInjector";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
 import { MmdMesh, type MmdSkinnedMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
@@ -74,12 +75,12 @@ export class Viewport {
     });
   }
 
-  /** Load a character's PMX with its resolved local textures. */
+  /** Load a character's model (PMX or PMD) with its resolved local textures. */
   async loadCharacter(character: LoadedCharacter): Promise<void> {
     this.disposeCurrentModel();
 
-    const container = await LoadAssetContainerAsync(new Uint8Array(character.pmx), this.scene, {
-      pluginExtension: ".pmx",
+    const container = await LoadAssetContainerAsync(new Uint8Array(character.model), this.scene, {
+      pluginExtension: character.modelKind === "pmd" ? ".pmd" : ".pmx",
       pluginOptions: {
         mmdmodel: {
           // babylon-mmd types `referenceFiles` as `readonly File[]`, but its
@@ -95,7 +96,7 @@ export class Viewport {
       (mesh): mesh is MmdSkinnedMesh => mesh instanceof Mesh && MmdMesh.isMmdSkinnedMesh(mesh),
     );
     if (!mmdMesh) {
-      throw new Error("Loaded PMX produced no MmdSkinnedMesh");
+      throw new Error("Loaded model produced no MmdSkinnedMesh");
     }
 
     this.currentMesh = mmdMesh;

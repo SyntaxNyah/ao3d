@@ -11,12 +11,12 @@ export interface IngestedCharacter {
 /**
  * Convert a locally-loaded character (Phase 1) into the authoring project's
  * inputs: the model (flat at the zip root), the .vmd motions, and the textures
- * with their PMX-relative paths preserved.
+ * with their model-relative paths preserved.
  */
 export function ingestCharacter(character: LoadedCharacter): IngestedCharacter {
   const model: ProjectModel = {
-    name: basename(character.pmxPath),
-    data: new Uint8Array(character.pmx),
+    name: basename(character.modelPath),
+    data: new Uint8Array(character.model),
   };
   const motions: ProjectMotion[] = character.files
     .filter((file) => file.path.toLowerCase().endsWith(".vmd"))
