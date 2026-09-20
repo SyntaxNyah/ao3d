@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AO3(D) — MMD Character Maker</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #000; font: 13px/1.4 system-ui, sans-serif; }
+      #viewport { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+      #hud {
+        position: fixed; top: 12px; left: 12px; z-index: 10;
+        display: flex; flex-direction: column; gap: 8px;
+      }
+      .row { display: flex; gap: 8px; }
+      button, input, select {
+        padding: 5px 8px; border: 1px solid #333; border-radius: 4px;
+        background: #1c1c22; color: #eee; font: inherit;
+      }
+      button { cursor: pointer; }
+      button:disabled { opacity: 0.45; cursor: default; }
+      #status {
+        margin: 0; padding: 8px 10px; max-width: 460px;
+        background: rgba(20, 20, 26, 0.88); color: #ccc;
+        border: 1px solid #333; border-radius: 4px; white-space: pre-wrap;
+      }
+      #customize {
+        display: flex; flex-direction: column; gap: 8px; padding: 10px;
+        background: rgba(18, 18, 24, 0.92); border: 1px solid #333; border-radius: 6px;
+        overflow-y: auto; max-height: calc(100vh - 120px); max-width: 520px;
+      }
+      #customize[hidden] { display: none; }
+      #customize label { display: flex; flex-direction: column; gap: 2px; color: #999; font-size: 11px; }
+      #mouth { color: #aac; font-size: 12px; }
+      .emote {
+        border: 1px solid #2a2a33; border-radius: 4px; padding: 8px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #15151b;
+      }
+      .emote h4 { margin: 0; grid-column: 1 / -1; color: #ddd; }
+      .emote .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+      .camera { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+      .camera label { flex-direction: row; align-items: center; }
+      .camera input { width: 52px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="viewport"></canvas>
+    <div id="hud">
+      <div class="row">
+        <button id="btn-files">Load files…</button>
+        <button id="btn-folder">Open folder…</button>
+        <button id="btn-export" disabled>Export…</button>
+      </div>
+      <pre id="status">Drop a .pmx model (+ textures, .vmd motions) anywhere, or use the buttons.</pre>
+      <div id="customize" hidden>
+        <label>Character name <input id="char-name" /></label>
+        <div id="mouth"></div>
+        <div id="emotes"></div>
+        <button id="btn-add-emote">Add emote</button>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
