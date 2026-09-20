@@ -8,13 +8,13 @@ describe("buildRetargetingMap", () => {
       ["センター", "左腕", "右腕"],
       ["Center", "Left Arm", "Right Arm"],
     );
-    expect(map).toEqual({ センター: "Center", 左腕: "Left Arm", 右腕: "Right Arm" });
+    expect(map).toEqual({ Center: "センター", "Left Arm": "左腕", "Right Arm": "右腕" });
     expect(missing).toEqual([]);
   });
 
   it("maps English motion bones to Japanese model bones", () => {
     const { map, missing } = buildRetargetingMap(["Left Arm", "Right Arm"], ["左腕", "右腕"]);
-    expect(map).toEqual({ "Left Arm": "左腕", "Right Arm": "右腕" });
+    expect(map).toEqual({ 左腕: "Left Arm", 右腕: "Right Arm" });
     expect(missing).toEqual([]);
   });
 
@@ -23,7 +23,7 @@ describe("buildRetargetingMap", () => {
       ["左親指１", "左人指１", "左中指２"],
       ["Thumb_02_L", "Index_01_L", "Middle_02_L"],
     );
-    expect(map).toEqual({ 左親指１: "Thumb_02_L", 左人指１: "Index_01_L", 左中指２: "Middle_02_L" });
+    expect(map).toEqual({ Thumb_02_L: "左親指１", Index_01_L: "左人指１", Middle_02_L: "左中指２" });
   });
 
   it("leaves exact-name matches out of the map", () => {
@@ -37,7 +37,7 @@ describe("buildRetargetingMap", () => {
       ["センター", "左腕", "left_finger_unknown"],
       ["Center", "Left Arm"],
     );
-    expect(map).toEqual({ センター: "Center", 左腕: "Left Arm" });
+    expect(map).toEqual({ Center: "センター", "Left Arm": "左腕" });
     expect(missing).toEqual(["left_finger_unknown"]);
   });
 
@@ -46,7 +46,7 @@ describe("buildRetargetingMap", () => {
       ["左親指１", "左人指１", "左小指１"],
       ["Thumb_02_L"],
     );
-    expect(map).toEqual({ 左親指１: "Thumb_02_L" });
+    expect(map).toEqual({ Thumb_02_L: "左親指１" });
     expect(missing).toEqual(["左人指１", "左小指１"]);
   });
 });

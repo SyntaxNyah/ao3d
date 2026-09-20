@@ -1,19 +1,22 @@
 import { canonicalizeBoneName } from "./bones";
 
 export interface RetargetingResult {
-  /** `{ [sourceBoneName]: targetBoneName }` for `createRuntimeAnimation`. */
+  /** `{ [modelBoneName]: animationBoneName }` for `createRuntimeAnimation`. */
   map: Record<string, string>;
-  /** Source bone names that had no matching target (exact or canonical). */
+  /** Animation bone names that had no matching model bone (exact or canonical). */
   missing: string[];
 }
 
 /**
- * Build a source→target bone retargeting map.
+ * Build a model→animation bone retargeting map.
  *
- * Bones that already match by exact name are left out (babylon-mmd binds them
- * directly). Bones that match only after canonicalization get an entry mapping
- * the source name to the target name. Source bones with no match at all are
- * reported in `missing` — e.g. a motion's finger bones on a model without them.
+ * babylon-mmd's `createRuntimeAnimation` expects a map whose keys are MODEL
+ * bone names and whose values are the ANIMATION bone names to bind to them —
+ * `MmdRuntimeModelAnimation.Create` looks up `retargetingMap[modelBoneName]`
+ * to find which animation track drives each model bone. Bones that already
+ * match by exact name are omitted (babylon-mmd binds them directly). Animation
+ * bones with no matching model bone at all are reported in `missing` — e.g. a
+ * motion's finger bones on a model without them.
  */
 export function buildRetargetingMap(
   sourceBoneNames: readonly string[],
@@ -35,7 +38,7 @@ export function buildRetargetingMap(
     const key = canonicalizeBoneName(source);
     if (key !== null && targetByCanonical.has(key)) {
       const target = targetByCanonical.get(key)!;
-      if (target !== source) map[source] = target;
+      if (target !== source) map[target] = source;
     } else if (targetSet.has(source)) {
       // Exact-name match; no retargeting entry needed.
     } else {
