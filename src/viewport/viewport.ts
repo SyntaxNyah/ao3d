@@ -120,6 +120,11 @@ export class Viewport {
     const targetBones = this.currentMesh.skeleton?.bones.map((bone) => bone.name) ?? [];
     const { map, missing } = buildRetargetingMap(sourceBones, targetBones);
 
+    // eslint-disable-next-line no-console
+    console.log("[ao3d] source bones:", JSON.stringify(sourceBones));
+    // eslint-disable-next-line no-console
+    console.log(`[ao3d] target bones (${targetBones.length}):`, JSON.stringify(targetBones.slice(0, 40)));
+
     const handle = this.mmdModel.createRuntimeAnimation(animation, map);
     this.mmdModel.setRuntimeAnimation(handle);
     this.mmdRuntime.playAnimation();

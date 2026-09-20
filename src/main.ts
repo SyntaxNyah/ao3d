@@ -54,7 +54,11 @@ initFileLoading((character) => {
       if (firstMotion) {
         const missing = await viewport.playMotion(firstMotion.data.buffer, firstMotion.name);
         if (missing.length > 0) {
-          boneWarning = ` ${missing.length} motion bone(s) could not bind.`;
+          const sample = missing.slice(0, 6).join(", ");
+          boneWarning =
+            missing.length > 6
+              ? ` ${missing.length} motion bone(s) could not bind (e.g. ${sample}, …).`
+              : ` ${missing.length} motion bone(s) could not bind (${sample}).`;
           console.warn(`[ao3d] ${missing.length} bone(s) in "${firstMotion.name}" could not bind`, missing);
         }
       }
