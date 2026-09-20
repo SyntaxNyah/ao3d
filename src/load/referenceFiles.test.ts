@@ -53,6 +53,27 @@ describe("resolveReferenceFiles", () => {
     expect(result.missing).toEqual([]);
   });
 
+  it("matches flat PMX paths against files inside a Texture2D subfolder", () => {
+    const result = resolveReferenceFiles(
+      [file("Texture2D/tex_bdy1127_00_diff.png")],
+      "1127_Fenomeno.pmx",
+      ["tex_bdy1127_00_diff.png"],
+    );
+
+    expect(result.missing).toEqual([]);
+    expect(result.referenceFiles[0].relativePath).toBe("tex_bdy1127_00_diff.png");
+  });
+
+  it("does not guess when multiple files share a basename", () => {
+    const result = resolveReferenceFiles(
+      [file("a/face.png"), file("b/face.png")],
+      "model.pmx",
+      ["face.png"],
+    );
+
+    expect(result.missing).toEqual(["face.png"]);
+  });
+
   it("reports textures that cannot be resolved", () => {
     const result = resolveReferenceFiles(
       [file("Texture2D/base.png")],

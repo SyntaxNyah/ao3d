@@ -46,9 +46,27 @@ initFileLoading((character) => {
 
       customize.hidden = false;
       customizer.render();
+
+      // Auto-play the first motion so the model animates immediately (the
+      // per-emote "Preview" button still lets you audition individual emotes).
+      let boneWarning = "";
+      const firstMotion = ingested.motions[0];
+      if (firstMotion) {
+        const missing = await viewport.playMotion(firstMotion.data.buffer, firstMotion.name);
+        if (missing.length > 0) {
+          boneWarning = ` ${missing.length} motion bone(s) could not bind.`;
+          console.warn(`[ao3d] ${missing.length} bone(s) in "${firstMotion.name}" could not bind`, missing);
+        }
+      }
+
+      const missingTextures = character.missingTextures.length;
+      const textureHint =
+        missingTextures > 0
+          ? ` ${missingTextures} texture(s) MISSING — drop the whole character folder (incl. Texture2D/) or use Open folder…`
+          : "";
       status.textContent =
         `Loaded ${ingested.model.name} — ${ingested.motions.length} motion(s), ` +
-        `${ingested.textures.length} texture(s). Add emotes and export when ready.`;
+        `${ingested.textures.length} texture(s) resolved.${boneWarning}${textureHint}`;
     } catch (error) {
       status.textContent = `Error: ${error instanceof Error ? error.message : String(error)}`;
       console.error("[ao3d] failed to load character", error);

@@ -44,8 +44,16 @@ export function resolveReferenceFiles(
 ): ResolveResult {
   const pmxDir = dirname(pmxPath);
   const byPath = new Map<string, LocalFile>();
+  // basename → file, so a texture resolves even when its PMX path carries a
+  // subdirectory (e.g. "Texture2D/face.png") but the file was dropped flat, or
+  // the PMX stores a flat name while the file lives in a subfolder. `null`
+  // marks an ambiguous basename (two files share it) that we won't guess on.
+  const byBasename = new Map<string, LocalFile | null>();
   for (const file of files) {
-    byPath.set(normalizePath(file.path).toUpperCase(), file);
+    const norm = normalizePath(file.path);
+    byPath.set(norm.toUpperCase(), file);
+    const base = basename(norm).toUpperCase();
+    byBasename.set(base, byBasename.has(base) ? null : file);
   }
 
   const referenceFiles: ReferenceFile[] = [];
@@ -53,15 +61,10 @@ export function resolveReferenceFiles(
 
   for (const texturePath of texturePaths) {
     const textureNorm = normalizePath(texturePath);
-    const candidates = [joinPath(pmxDir, textureNorm), basename(textureNorm)];
 
-    let found: LocalFile | undefined;
-    for (const candidate of candidates) {
-      const match = byPath.get(candidate.toUpperCase());
-      if (match) {
-        found = match;
-        break;
-      }
+    let found = byPath.get(joinPath(pmxDir, textureNorm).toUpperCase());
+    if (!found) {
+      found = byBasename.get(basename(textureNorm).toUpperCase()) ?? undefined;
     }
 
     if (found) {
