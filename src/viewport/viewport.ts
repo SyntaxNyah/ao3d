@@ -117,13 +117,16 @@ export class Viewport {
       ...animation.boneTracks.map((track) => track.name),
       ...animation.movableBoneTracks.map((track) => track.name),
     ];
-    const targetBones = this.currentMesh.skeleton?.bones.map((bone) => bone.name) ?? [];
+    // babylon-mmd stores the authoritative skeleton on the mesh's *metadata*
+    // (`metadata.skeleton`), not on Babylon's `mesh.skeleton`. Reading
+    // `mesh.skeleton` can be null/empty, which silently broke retargeting.
+    const metadataSkeleton = this.currentMesh.metadata?.skeleton as
+      | { bones: Array<{ name: string }> }
+      | null
+      | undefined;
+    const skeleton = metadataSkeleton ?? this.currentMesh.skeleton;
+    const targetBones = skeleton?.bones.map((bone) => bone.name) ?? [];
     const { map, missing } = buildRetargetingMap(sourceBones, targetBones);
-
-    // eslint-disable-next-line no-console
-    console.log("[ao3d] source bones:", JSON.stringify(sourceBones));
-    // eslint-disable-next-line no-console
-    console.log(`[ao3d] target bones (${targetBones.length}):`, JSON.stringify(targetBones.slice(0, 40)));
 
     const handle = this.mmdModel.createRuntimeAnimation(animation, map);
     this.mmdModel.setRuntimeAnimation(handle);
