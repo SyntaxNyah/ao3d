@@ -45,8 +45,12 @@ export class Viewport {
 
     this.camera = new ArcRotateCamera("camera", 0, Math.PI / 3, 20, Vector3.Zero(), this.scene);
     this.camera.attachControl(canvas, true);
-    this.camera.wheelPrecision = 30;
-    this.camera.minZ = 0.05;
+    // Exponential zoom: each wheel notch scales the radius by ~10%, so the
+    // camera can travel from a close-up to very far out in a few scrolls.
+    // (The default linear `wheelPrecision` zoom is far too slow for that.)
+    this.camera.wheelDeltaPercentage = 0.1;
+    this.camera.minZ = 0.01;
+    this.camera.maxZ = 100000;
 
     new HemisphericLight("hemi", new Vector3(0, 1, 0), this.scene);
     const key = new DirectionalLight("key", new Vector3(-0.5, -1, -0.5), this.scene);
@@ -161,12 +165,13 @@ export class Viewport {
     const radius = Math.max(size.length() * 0.5, 0.5);
 
     this.camera.setTarget(center);
-    this.camera.radius = radius * 3;
-    this.camera.lowerRadiusLimit = radius * 0.5;
-    this.camera.upperRadiusLimit = radius * 20;
+    this.camera.radius = radius * 4;
+    this.camera.lowerRadiusLimit = radius * 0.25;
+    this.camera.upperRadiusLimit = radius * 1000;
     this.camera.beta = Math.PI / 3;
     this.camera.alpha = 0;
-    this.camera.minZ = Math.max(radius * 0.01, 0.05);
+    this.camera.minZ = Math.max(radius * 0.005, 0.01);
+    this.camera.maxZ = radius * 2000;
   }
 
   private disposeCurrentModel(): void {
